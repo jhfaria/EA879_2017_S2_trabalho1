@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <math.h>
 
 #include "imageprocessing.h"
 
@@ -118,13 +119,19 @@ void valor_maximo(imagem *I)
      	{
 	      	int idx;
 
+	      	int valor_aux;
+
 	      	idx = i + (j*I->width);
 
-	      	if (I->r[idx] > valor_maximo) {valor_maximo = I->r[idx];}
+	      	// if (I->r[idx] > valor_maximo) {valor_maximo = I->r[idx];}
 
-	      	if (I->g[idx] > valor_maximo) {valor_maximo = I->g[idx];}
+	      	// if (I->g[idx] > valor_maximo) {valor_maximo = I->g[idx];}
 
-	      	if (I->b[idx] > valor_maximo) {valor_maximo = I->b[idx];}
+	      	// if (I->b[idx] > valor_maximo) {valor_maximo = I->b[idx];}
+
+	      	valor_aux = sqrt(pow(I->r[idx], 2.0) + pow(I->g[idx], 2.0) + pow(I->b[idx], 2.0));
+
+	      	if (valor_aux > valor_maximo) {valor_maximo = valor_aux;}
     	}
   	}
 
