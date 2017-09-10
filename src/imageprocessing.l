@@ -17,7 +17,9 @@ void yyerror(char *);
 \" { return ASPA; }
 
 [0-9]+(.)*[0-9]* {
+		/* converte o valor de string para float */
 		yylval.float_value = atof(yytext);
+		
 		return NUMERO;
 	}
 

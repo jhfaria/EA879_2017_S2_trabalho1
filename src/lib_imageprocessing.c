@@ -91,8 +91,10 @@ void salvar_imagem(char *nome_do_arquivo, imagem *I)
   FreeImage_Save(FIF_JPEG, bitmapOut, nome_do_arquivo, JPEG_DEFAULT);
 }
 
+/* função para alterar o brilho da imagem */
 void altera_brilho(imagem *I, float valor_ganho)
 {
+	/* laço para alcançar todos os pixels da imagem */
 	for (int i=0; i<I->width; i++) 
 	{
      	for (int j=0; j<I->height; j++) 
@@ -100,8 +102,14 @@ void altera_brilho(imagem *I, float valor_ganho)
 	      	int idx;
 
 	      	idx = i + (j*I->width);
+
+	      	/* para a parte vermelha do pixel */
 	      	I->r[idx]	= (I->r[idx] * valor_ganho);
+
+	      	/* para a parte verde do pixel */
 	      	I->g[idx] 	= (I->g[idx] * valor_ganho);
+
+	      	/* para a parte azul do pixel */
 	      	I->b[idx] 	= (I->b[idx] * valor_ganho);
     	}
   	}
@@ -109,10 +117,12 @@ void altera_brilho(imagem *I, float valor_ganho)
 	return;
 }
 
+/* função que imprime o valor maximo dos pixels da imagem */
 void valor_maximo(imagem *I)
 {
 	float valor_maximo = 0;
 
+	/* laço para alcançar todos os pixels da imagem */
 	for (int i=0; i<I->width; i++) 
 	{
      	for (int j=0; j<I->height; j++) 
@@ -123,18 +133,23 @@ void valor_maximo(imagem *I)
 
 	      	idx = i + (j*I->width);
 
+	      	/* tentativa 1 */
 	      	// if (I->r[idx] > valor_maximo) {valor_maximo = I->r[idx];}
 
 	      	// if (I->g[idx] > valor_maximo) {valor_maximo = I->g[idx];}
 
 	      	// if (I->b[idx] > valor_maximo) {valor_maximo = I->b[idx];}
 
+	      	/* tentativa 2 */
+	      	/* sqrt: raiz quadrada; pow: potência */
+	      	/* "norma" do valor do pixel */
 	      	valor_aux = sqrt(pow(I->r[idx], 2.0) + pow(I->g[idx], 2.0) + pow(I->b[idx], 2.0));
 
 	      	if (valor_aux > valor_maximo) {valor_maximo = valor_aux;}
     	}
   	}
 
+  	/* imprime o valor máximo */
   	printf("%f\n", valor_maximo);
 
 	return;

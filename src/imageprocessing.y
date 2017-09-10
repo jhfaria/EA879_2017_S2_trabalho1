@@ -38,6 +38,7 @@ EXPRESSAO:
                           }
 
     | STRING IGUAL STRING VEZES NUMERO {
+    	/* estrutura para aumentar o brilho e salvar em um arquivo diferente */
     	imagem I = abrir_imagem($3);
     	altera_brilho(&I, $5);
     	salvar_imagem($1, &I);
@@ -45,6 +46,7 @@ EXPRESSAO:
     }
 
     | STRING IGUAL STRING DIVIDIDO NUMERO {
+    	/* estrutura para diminuir o brilho e salvar em um arquivo diferente */
     	imagem I = abrir_imagem($3);
     	altera_brilho(&I, (1/$5));
     	salvar_imagem($1, &I);
@@ -52,6 +54,7 @@ EXPRESSAO:
     }
 
     | ABRE_COLCHETE STRING FECHA_COLCHETE {
+    	/* imprime o vlaor máximo dos pixels da imagem */
     	imagem I = abrir_imagem($2);
     	valor_maximo(&I);
         liberar_imagem(&I);
