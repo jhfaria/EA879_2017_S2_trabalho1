@@ -104,13 +104,22 @@ void altera_brilho(imagem *I, float valor_ganho)
 	      	idx = i + (j*I->width);
 
 	      	/* para a parte vermelha do pixel */
-	      	I->r[idx]	= (I->r[idx] * valor_ganho);
+		if((I->r[idx] * valor_ganho) <= 255)
+	      		I->r[idx]	= (I->r[idx] * valor_ganho);
+		else
+			I->r[idx] = 255;
 
 	      	/* para a parte verde do pixel */
-	      	I->g[idx] 	= (I->g[idx] * valor_ganho);
+		if((I->g[idx] * valor_ganho) <= 255)
+	      		I->g[idx] 	= (I->g[idx] * valor_ganho);
+		else
+			I->g[idx] = 255;
 
 	      	/* para a parte azul do pixel */
-	      	I->b[idx] 	= (I->b[idx] * valor_ganho);
+		if((I->b[idx] * valor_ganho) <= 255)
+	      		I->b[idx] 	= (I->b[idx] * valor_ganho);
+		else		
+			I->b[idx] = 255;
     	}
   	}
 
