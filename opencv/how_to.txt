@@ -1,0 +1,11 @@
+1) instalar o CMake e o OpenCV
+
+2) no terminal: 
+
+	$ cmake CMakeLists.txt
+
+	$ make
+
+	$ ./DisplayImage demo.jpg
+
+OBS: a imagem é sempre salva como 'teste_brilho.jpg'

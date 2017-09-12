@@ -1,0 +1,3 @@
+/home/jhfaria/Documents/EA879/EA879_2017_S2_trabalho1/opencv/CMakeFiles/rebuild_cache.dir
+/home/jhfaria/Documents/EA879/EA879_2017_S2_trabalho1/opencv/CMakeFiles/edit_cache.dir
+/home/jhfaria/Documents/EA879/EA879_2017_S2_trabalho1/opencv/CMakeFiles/DisplayImage.dir
