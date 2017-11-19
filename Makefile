@@ -2,8 +2,8 @@
 SRCDIR=./src
 
 all: lex.yy.c y.tab.c lib_imageprocessing.o
-# -lm para adicionar math.h 
-	gcc -omain lex.yy.c y.tab.c lib_imageprocessing.o -ll -lfreeimage -I$(SRCDIR) -lm
+# -lm para adicionar math.h
+	gcc -omain lex.yy.c y.tab.c lib_imageprocessing.o -ll -lfreeimage -I$(SRCDIR) -lm -pthread -g
 
 lex.yy.c:$(SRCDIR)/imageprocessing.l
 	lex $(SRCDIR)/imageprocessing.l

@@ -2,13 +2,13 @@
 #include <stdio.h>
 #include "imageprocessing.h"
 #include <FreeImage.h>
-
+#include <pthread.h>
 void yyerror(char *c);
 int yylex(void);
 %}
 
 
-%union 
+%union
 {
   char    	strval[50];
   int     	ival;
@@ -17,7 +17,7 @@ int yylex(void);
 
 
 %token <strval> STRING
-%token <ival> VAR IGUAL EOL ASPA VEZES DIVIDIDO ABRE_COLCHETE FECHA_COLCHETE
+%token <ival> VAR IGUAL EOL ASPA DOISVEZES VEZES DIVIDIDO ABRE_COLCHETE FECHA_COLCHETE
 %token <float_value> NUMERO
 %left SOMA
 
@@ -35,14 +35,22 @@ EXPRESSAO:
         printf("Li imagem %d por %d\n", I.width, I.height);
         salvar_imagem($1, &I);
         liberar_imagem(&I);
-                          }
+    }
+    | STRING IGUAL STRING DOISVEZES  NUMERO {
+      /* estrutura para aumentar o brilho e salvar em um arquivo diferente usando threads */
+      imagem I = abrir_imagem($3);
+      newThreads(&I, $5);
+      salvar_imagem($1, &I);
+      liberar_imagem(&I);
+
+    }
 
     | STRING IGUAL STRING VEZES NUMERO {
     	/* estrutura para aumentar o brilho e salvar em um arquivo diferente */
     	imagem I = abrir_imagem($3);
     	altera_brilho(&I, $5);
     	salvar_imagem($1, &I);
-        liberar_imagem(&I);
+      liberar_imagem(&I);
     }
 
     | STRING IGUAL STRING DIVIDIDO NUMERO {
@@ -50,7 +58,7 @@ EXPRESSAO:
     	imagem I = abrir_imagem($3);
     	altera_brilho(&I, (1/$5));
     	salvar_imagem($1, &I);
-        liberar_imagem(&I);
+      liberar_imagem(&I);
     }
 
     | ABRE_COLCHETE STRING FECHA_COLCHETE {
@@ -63,13 +71,13 @@ EXPRESSAO:
 %%
 
 
-void yyerror(char *s) 
+void yyerror(char *s)
 {
     fprintf(stderr, "%s\n", s);
 }
 
 
-int main() 
+int main()
 {
   FreeImage_Initialise(0);
   yyparse();

@@ -19,7 +19,7 @@ void yyerror(char *);
 [0-9]+(.)*[0-9]* {
 		/* converte o valor de string para float */
 		yylval.float_value = atof(yytext);
-		
+
 		return NUMERO;
 	}
 
@@ -41,10 +41,15 @@ void yyerror(char *);
 \n  {
     	return EOL;
     }
+    
+\*\*  {
+		return DOISVEZES;
+	}
 
 \*  {
 		return VEZES;
 	}
+
 
 \/  {
 		return DIVIDIDO;
@@ -57,7 +62,7 @@ void yyerror(char *);
 \]  {
 		return FECHA_COLCHETE;
 	}
-       
+
 [ \t]+ ;
 
 .     {printf("**%s**\n", yytext);
@@ -66,7 +71,7 @@ yyerror("Token nao reconhecido!\n");}
 %%
 
 
-int  yywrap() 
+int  yywrap()
 {
   return 1;
 }
