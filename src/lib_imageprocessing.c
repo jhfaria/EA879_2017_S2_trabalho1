@@ -96,10 +96,10 @@ void salvar_imagem(char *nome_do_arquivo, imagem *I)
 /* função para alterar o brilho da imagem */
 void altera_brilho(imagem *I, float valor_ganho)
 {
-	// contagem do tempo de execucao
+	/* contagem do tempo de execucao */
 	struct timeval t1, t2;
 	double deltat;
-	//checa o tempo no inicio
+	/* checa o tempo no inicio */
 	gettimeofday(&t1, NULL);
 
 	/* laço para alcançar todos os pixels da imagem */
@@ -124,16 +124,19 @@ void altera_brilho(imagem *I, float valor_ganho)
 		    else {I->b[idx] = 255;}
 	   	}
   	}
-		//checa o tempo no final
+		/*checa o tempo no final */
 		gettimeofday(&t2, NULL);
-		//calcula o tempo transcorrido
+
+		/* calcula o tempo transcorrido */
 		deltat = (t2.tv_sec - t1.tv_sec) * 1000.0;      // sec to ms
-    deltat += (t2.tv_usec - t1.tv_usec) / 1000.0;   // us to ms
-		//imprime o tempo de execucao
-		printf("Tempo de execucao %f ms\n", deltat );
+    	deltat += (t2.tv_usec - t1.tv_usec) / 1000.0;   // us to ms
+
+		/* imprime o tempo de execucao */
+		printf("Tempo de execução [ms]: %f\n", deltat);
 
 	return;
 }
+
 /* função que imprime o valor maximo dos pixels da imagem */
 void valor_maximo(imagem *I)
 {
@@ -164,55 +167,54 @@ void valor_maximo(imagem *I)
 
 void * multMatrixthread(void * parameterTh)
  {
+  	//recupera o argumento da thread
+	strThread * parameterThread;
+	parameterThread = (strThread *)parameterTh;
+	// recupera o thread id
+	long tid = parameterThread->t;
+	//recupera o ganho
+	float valor_ganho = parameterThread->ganho;
+	//diz pra main que pode criar outra thread, ja que essa aqui já pegou tudo
+	parameterThread->flag = 1;
 
-	  //recupera o argumento da thread
-		strThread * parameterThread;
-		parameterThread = (strThread *)parameterTh;
-		// recupera o thread id
-		long tid = parameterThread->t;
-		//recupera o ganho
-		float valor_ganho = parameterThread->ganho;
-		//diz pra main que pode criar outra thread, ja que essa aqui já pegou tudo
-		parameterThread->flag = 1;
+	//job eh o numero de trabalhos que a thread deve fazer
+	int jobs;
+	//se for a ultima e o numer de trabalhos nao for multiplo do numero de threads, a ultma faz o que sobra
+	if (tid == (NUM_THREADS - 1))
+			jobs = parameterThread->width*parameterThread->height/NUM_THREADS + (parameterThread->width*parameterThread->height)%NUM_THREADS;
+	else
+		  jobs = parameterThread->width*parameterThread->height/NUM_THREADS;
 
-		//job eh o numero de trabalhos que a thread deve fazer
-		int jobs;
-		//se for a ultima e o numer de trabalhos nao for multiplo do numero de threads, a ultma faz o que sobra
-		if (tid == (NUM_THREADS - 1))
-				jobs = parameterThread->width*parameterThread->height/NUM_THREADS + (parameterThread->width*parameterThread->height)%NUM_THREADS;
-		else
-			  jobs = parameterThread->width*parameterThread->height/NUM_THREADS;
-
-		// trabalhos das outras thread que a thread deve pular
-		int jobsdone =  parameterThread->width*parameterThread->height/NUM_THREADS * tid;
+	// trabalhos das outras thread que a thread deve pular
+	int jobsdone =  parameterThread->width*parameterThread->height/NUM_THREADS * tid;
 
 
-		//executa o seu lote de trabalho
-		for (int i = 0; i < jobs; i++) {
+	//executa o seu lote de trabalho
+	for (int i = 0; i < jobs; i++) {
 
-				/* para a parte vermelha do pixel */
-				if ((parameterThread->r[i+jobsdone] * valor_ganho) <= 255)
-						parameterThread->r[i+jobsdone] = (parameterThread->r[i+jobsdone] * valor_ganho);
-				else
-						parameterThread->r[i+jobsdone] = 255;
+			/* para a parte vermelha do pixel */
+			if ((parameterThread->r[i+jobsdone] * valor_ganho) <= 255)
+					parameterThread->r[i+jobsdone] = (parameterThread->r[i+jobsdone] * valor_ganho);
+			else
+					parameterThread->r[i+jobsdone] = 255;
 
-				/* para a parte verde do pixel */
-				if ((parameterThread->g[i+jobsdone] * valor_ganho) <= 255)
-						parameterThread->g[i+jobsdone] = (parameterThread->g[i+jobsdone] * valor_ganho);
-				else
-						parameterThread->g[i+jobsdone] = 255;
+			/* para a parte verde do pixel */
+			if ((parameterThread->g[i+jobsdone] * valor_ganho) <= 255)
+					parameterThread->g[i+jobsdone] = (parameterThread->g[i+jobsdone] * valor_ganho);
+			else
+					parameterThread->g[i+jobsdone] = 255;
 
-				/* para a parte azul do pixel */
-				if ((parameterThread->b[i+jobsdone] * valor_ganho) <= 255)
-					parameterThread->b[i+jobsdone] = (parameterThread->b[i+jobsdone] * valor_ganho);
-				else
-						parameterThread->b[i+jobsdone] = 255;
+			/* para a parte azul do pixel */
+			if ((parameterThread->b[i+jobsdone] * valor_ganho) <= 255)
+				parameterThread->b[i+jobsdone] = (parameterThread->b[i+jobsdone] * valor_ganho);
+			else
+					parameterThread->b[i+jobsdone] = 255;
 
-			}
-		//avisa a main que acabou o trabalho
-		parameterThread->flagend++;
+		}
+	//avisa a main que acabou o trabalho
+	parameterThread->flagend++;
 
-		return NULL;
+	return NULL;
  }
 
 void newThreads(imagem *I, float valor_ganho){
@@ -260,8 +262,10 @@ void newThreads(imagem *I, float valor_ganho){
 		gettimeofday(&t2, NULL);
 		//calcula o tempo transcorrido
 		deltat = (t2.tv_sec - t1.tv_sec) * 1000.0;      // s para ms
-    deltat += (t2.tv_usec - t1.tv_usec) / 1000.0;   // us para ms
-		//imprime o tempo de execucao
-		printf("Tempo de execucao %f ms\n", deltat );
+    	deltat += (t2.tv_usec - t1.tv_usec) / 1000.0;   // us para ms
+		
+		/* imprime o tempo de execucao */
+		printf("Tempo de execução [ms]: %f\n", deltat);
+
 		return;
  }

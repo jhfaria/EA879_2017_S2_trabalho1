@@ -50,13 +50,14 @@ extern int yydebug;
     IGUAL = 260,
     EOL = 261,
     ASPA = 262,
-    DOISVEZES = 263,
-    VEZES = 264,
-    DIVIDIDO = 265,
-    ABRE_COLCHETE = 266,
-    FECHA_COLCHETE = 267,
-    NUMERO = 268,
-    SOMA = 269
+    VEZES = 263,
+    DIVIDIDO = 264,
+    ABRE_COLCHETE = 265,
+    FECHA_COLCHETE = 266,
+    VEZES_T = 267,
+    VEZES_P = 268,
+    NUMERO = 269,
+    SOMA = 270
   };
 #endif
 /* Tokens.  */
@@ -65,13 +66,14 @@ extern int yydebug;
 #define IGUAL 260
 #define EOL 261
 #define ASPA 262
-#define DOISVEZES 263
-#define VEZES 264
-#define DIVIDIDO 265
-#define ABRE_COLCHETE 266
-#define FECHA_COLCHETE 267
-#define NUMERO 268
-#define SOMA 269
+#define VEZES 263
+#define DIVIDIDO 264
+#define ABRE_COLCHETE 265
+#define FECHA_COLCHETE 266
+#define VEZES_T 267
+#define VEZES_P 268
+#define NUMERO 269
+#define SOMA 270
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
@@ -80,11 +82,11 @@ union YYSTYPE
 {
 #line 12 "./src/imageprocessing.y" /* yacc.c:1909  */
 
-  char    	strval[50];
-  int     	ival;
+  char    strval[50];
+  int     ival;
   float		float_value;
 
-#line 88 "y.tab.h" /* yacc.c:1909  */
+#line 90 "y.tab.h" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;

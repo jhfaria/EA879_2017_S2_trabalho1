@@ -42,14 +42,9 @@ void yyerror(char *);
     	return EOL;
     }
     
-\*\*  {
-		return DOISVEZES;
-	}
-
 \*  {
 		return VEZES;
 	}
-
 
 \/  {
 		return DIVIDIDO;
@@ -64,6 +59,14 @@ void yyerror(char *);
 	}
 
 [ \t]+ ;
+
+\*[t]  {
+		return VEZES_T;
+	}
+
+\*[p]  {
+		return VEZES_P;
+	}
 
 .     {printf("**%s**\n", yytext);
 yyerror("Token nao reconhecido!\n");}

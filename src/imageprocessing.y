@@ -10,14 +10,14 @@ int yylex(void);
 
 %union
 {
-  char    	strval[50];
-  int     	ival;
+  char    strval[50];
+  int     ival;
   float		float_value;
 }
 
 
 %token <strval> STRING
-%token <ival> VAR IGUAL EOL ASPA DOISVEZES VEZES DIVIDIDO ABRE_COLCHETE FECHA_COLCHETE
+%token <ival> VAR IGUAL EOL ASPA VEZES DIVIDIDO ABRE_COLCHETE FECHA_COLCHETE VEZES_T VEZES_P
 %token <float_value> NUMERO
 %left SOMA
 
@@ -36,7 +36,8 @@ EXPRESSAO:
         salvar_imagem($1, &I);
         liberar_imagem(&I);
     }
-    | STRING IGUAL STRING DOISVEZES  NUMERO {
+
+    | STRING IGUAL STRING VEZES_T NUMERO {
       /* estrutura para aumentar o brilho e salvar em um arquivo diferente usando threads */
       imagem I = abrir_imagem($3);
       newThreads(&I, $5);
