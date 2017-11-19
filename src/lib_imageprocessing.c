@@ -93,12 +93,13 @@ void salvar_imagem(char *nome_do_arquivo, imagem *I)
   FreeImage_Save(FIF_JPEG, bitmapOut, nome_do_arquivo, JPEG_DEFAULT);
 }
 
-/* função para alterar o brilho da imagem */
+/* função para alterar o brilho da imagem (varrendo linhas)*/
 void altera_brilho(imagem *I, float valor_ganho)
 {
 	/* contagem do tempo de execucao */
 	struct timeval t1, t2;
 	double deltat;
+
 	/* checa o tempo no inicio */
 	gettimeofday(&t1, NULL);
 
@@ -133,6 +134,96 @@ void altera_brilho(imagem *I, float valor_ganho)
 
 		/* imprime o tempo de execucao */
 		printf("Tempo de execução [ms]: %f\n", deltat);
+
+	return;
+}
+
+/* função para alterar o brilho da imagem (varrendo linhas)*/
+void altera_brilho_por_linhas(imagem *I, float valor_ganho)
+{
+	/* contagem do tempo de execucao */
+	struct timeval t1, t2;
+	double deltat;
+
+	/* checa o tempo no inicio */
+	gettimeofday(&t1, NULL);
+
+	/* laço para alcançar todos os pixels da imagem */
+	for (int i=0; i<I->width; i++)
+	{
+     	for (int j=0; j<I->height; j++)
+     	{
+	      	int idx;
+
+	      	idx = i + (j*I->width);
+
+		    /* para a parte vermelha do pixel */
+			if ((I->r[idx] * valor_ganho) <= 255) {I->r[idx] = (I->r[idx] * valor_ganho);}
+		    else {I->r[idx] = 255;}
+
+		    /* para a parte verde do pixel */
+			if ((I->g[idx] * valor_ganho) <= 255) {I->g[idx] = (I->g[idx] * valor_ganho);}
+		    else {I->g[idx] = 255;}
+
+		    /* para a parte azul do pixel */
+			if ((I->b[idx] * valor_ganho) <= 255) {I->b[idx] = (I->b[idx] * valor_ganho);}
+		    else {I->b[idx] = 255;}
+	   	}
+  	}
+		/*checa o tempo no final */
+		gettimeofday(&t2, NULL);
+
+		/* calcula o tempo transcorrido */
+		deltat = (t2.tv_sec - t1.tv_sec) * 1000.0;      // sec to ms
+    	deltat += (t2.tv_usec - t1.tv_usec) / 1000.0;   // us to ms
+
+		/* imprime o tempo de execucao */
+		printf("Tempo de execução (varrendo por linhas): %f [ms]\n", deltat);
+
+	return;
+}
+
+/* função para alterar o brilho da imagem (varrendo colunas)*/
+void altera_brilho_por_colunas(imagem *I, float valor_ganho)
+{
+	/* contagem do tempo de execucao */
+	struct timeval t1, t2;
+	double deltat;
+
+	/* checa o tempo no inicio */
+	gettimeofday(&t1, NULL);
+
+	/* laço para alcançar todos os pixels da imagem */
+	for (int j=0; j<I->height; j++)
+	{
+     	for (int i=0; i<I->width; i++)
+     	{
+	      	int idx;
+
+	      	idx = i + (j*I->width);
+
+		    /* para a parte vermelha do pixel */
+			if ((I->r[idx] * valor_ganho) <= 255) {I->r[idx] = (I->r[idx] * valor_ganho);}
+		    else {I->r[idx] = 255;}
+
+		    /* para a parte verde do pixel */
+			if ((I->g[idx] * valor_ganho) <= 255) {I->g[idx] = (I->g[idx] * valor_ganho);}
+		    else {I->g[idx] = 255;}
+
+		    /* para a parte azul do pixel */
+			if ((I->b[idx] * valor_ganho) <= 255) {I->b[idx] = (I->b[idx] * valor_ganho);}
+		    else {I->b[idx] = 255;}
+	   	}
+  	}
+		/*checa o tempo no final */
+		gettimeofday(&t2, NULL);
+
+		/* calcula o tempo transcorrido */
+		deltat = (t2.tv_sec - t1.tv_sec) * 1000.0;      // sec to ms
+    	deltat += (t2.tv_usec - t1.tv_usec) / 1000.0;   // us to ms
+
+		/* imprime o tempo de execucao */
+		printf("Tempo de execução (varrendo por colunas): %f [ms]\n", deltat);
 
 	return;
 }
@@ -217,55 +308,62 @@ void * multMatrixthread(void * parameterTh)
 	return NULL;
  }
 
-void newThreads(imagem *I, float valor_ganho){
+void newThreads(imagem *I, float valor_ganho)
+{
+	// contagem do tempo de execucao
+	struct timeval t1, t2;
+	double deltat;
+	//checa o tempo no inicio
+	gettimeofday(&t1, NULL);
 
-		// contagem do tempo de execucao
-		struct timeval t1, t2;
-		double deltat;
-		//checa o tempo no inicio
-		gettimeofday(&t1, NULL);
+	//cria NUM_THREADS threads
+	pthread_t threads[NUM_THREADS];
+	int rc;
+	strThread parameterThread;
 
-		//cria NUM_THREADS threads
-		pthread_t threads[NUM_THREADS];
-		int rc;
-		strThread parameterThread;
+	//copia a struct img para outra struct contendo outros parametros, pois so podemos passar um argumento pra thread
+	parameterThread.width = I->width;
+	parameterThread.height = I->height;
+	parameterThread.r = &(I->r[0]);
+	parameterThread.g = &(I->g[0]);
+	parameterThread.b = &(I->b[0]);
+	parameterThread.ganho = valor_ganho;
+	parameterThread.flagend = 0;
 
-		//copia a struct img para outra struct contendo outros parametros, pois so podemos passar um argumento pra thread
-		parameterThread.width = I->width;
-		parameterThread.height = I->height;
-		parameterThread.r = &(I->r[0]);
-		parameterThread.g = &(I->g[0]);
-		parameterThread.b = &(I->b[0]);
-		parameterThread.ganho = valor_ganho;
-		parameterThread.flagend = 0;
-		//o argumento deve ser um ponteiro
-		void * argumento = &parameterThread;
-		// crio as threads
-    for((parameterThread.t)=0; (parameterThread.t)<NUM_THREADS; (parameterThread.t)++){
-			 // condicao para recuperacao do argumento sem que ele mude no meio do caminho
-			 parameterThread.flag = 0;
-			 //cria a thread com id parameterThread.t e rotina multMatrixthread com argumento 'argumento'
-			 rc = pthread_create(&threads[parameterThread.t], NULL, multMatrixthread, argumento);
-       if (rc){
-				 //rotina de erro
-          printf("ERROR; return code from pthread_create() is %d\n", rc);
-          exit(-1);
-       }
-			 //fica preso aqui ate que a thread tenha recuperado todo argumento
-			 while (!parameterThread.flag);
-    }
+	//o argumento deve ser um ponteiro
+	void * argumento = &parameterThread;
 
-		//fica preso aqui até a thread terminar SE ACHAR OUTRA COISA, É MELHOR
-		while (parameterThread.flagend != NUM_THREADS);
-
-		//checa o tempo no final
-		gettimeofday(&t2, NULL);
-		//calcula o tempo transcorrido
-		deltat = (t2.tv_sec - t1.tv_sec) * 1000.0;      // s para ms
-    	deltat += (t2.tv_usec - t1.tv_usec) / 1000.0;   // us para ms
+	// crio as threads
+	for((parameterThread.t)=0; (parameterThread.t)<NUM_THREADS; (parameterThread.t)++)
+	{
+		// condicao para recuperacao do argumento sem que ele mude no meio do caminho
+		parameterThread.flag = 0;
+		//cria a thread com id parameterThread.t e rotina multMatrixthread com argumento 'argumento'
+		rc = pthread_create(&threads[parameterThread.t], NULL, multMatrixthread, argumento);
 		
-		/* imprime o tempo de execucao */
-		printf("Tempo de execução [ms]: %f\n", deltat);
+		if(rc)
+		{
+		//rotina de erro
+			printf("ERROR; return code from pthread_create() is %d\n", rc);
+		    exit(-1);
+		}
 
-		return;
+		//fica preso aqui ate que a thread tenha recuperado todo argumento
+		while (!parameterThread.flag);
+	}
+
+	//fica preso aqui até a thread terminar SE ACHAR OUTRA COISA, É MELHOR
+	while (parameterThread.flagend != NUM_THREADS);
+
+	//checa o tempo no final
+	gettimeofday(&t2, NULL);
+
+	//calcula o tempo transcorrido
+	deltat = (t2.tv_sec - t1.tv_sec) * 1000.0;      // s para ms
+	deltat += (t2.tv_usec - t1.tv_usec) / 1000.0;   // us para ms
+	
+	/* imprime o tempo de execucao */
+	printf("Tempo de execução (usando threads): %f [ms]\n", deltat);
+
+	return;
  }

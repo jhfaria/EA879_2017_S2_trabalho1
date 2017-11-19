@@ -17,7 +17,7 @@ int yylex(void);
 
 
 %token <strval> STRING
-%token <ival> VAR IGUAL EOL ASPA VEZES DIVIDIDO ABRE_COLCHETE FECHA_COLCHETE VEZES_T VEZES_P
+%token <ival> VAR IGUAL EOL ASPA VEZES DIVIDIDO ABRE_COLCHETE FECHA_COLCHETE VEZES_T DIVIDIDO_T VEZES_P DIVIDIDO_P VEZES_L DIVIDIDO_L VEZES_C DIVIDIDO_C
 %token <float_value> NUMERO
 %left SOMA
 
@@ -44,6 +44,46 @@ EXPRESSAO:
       salvar_imagem($1, &I);
       liberar_imagem(&I);
 
+    }
+
+    | STRING IGUAL STRING DIVIDIDO_T NUMERO {
+      /* estrutura para aumentar o brilho e salvar em um arquivo diferente usando threads */
+      imagem I = abrir_imagem($3);
+      newThreads(&I, 1/$5);
+      salvar_imagem($1, &I);
+      liberar_imagem(&I);
+    }
+
+    | STRING IGUAL STRING VEZES_L NUMERO {
+      /* estrutura para aumentar o brilho e salvar em um arquivo diferente usando threads */
+      imagem I = abrir_imagem($3);
+      altera_brilho_por_linhas(&I, $5);
+      salvar_imagem($1, &I);
+      liberar_imagem(&I);
+    }
+
+    | STRING IGUAL STRING DIVIDIDO_L NUMERO {
+      /* estrutura para aumentar o brilho e salvar em um arquivo diferente usando threads */
+      imagem I = abrir_imagem($3);
+      altera_brilho_por_linhas(&I, 1/$5);
+      salvar_imagem($1, &I);
+      liberar_imagem(&I);
+    }
+
+    | STRING IGUAL STRING VEZES_C NUMERO {
+      /* estrutura para aumentar o brilho e salvar em um arquivo diferente usando threads */
+      imagem I = abrir_imagem($3);
+      altera_brilho_por_colunas(&I, $5);
+      salvar_imagem($1, &I);
+      liberar_imagem(&I);
+    }
+
+    | STRING IGUAL STRING DIVIDIDO_C NUMERO {
+      /* estrutura para aumentar o brilho e salvar em um arquivo diferente usando threads */
+      imagem I = abrir_imagem($3);
+      altera_brilho_por_colunas(&I, 1/$5);
+      salvar_imagem($1, &I);
+      liberar_imagem(&I);
     }
 
     | STRING IGUAL STRING VEZES NUMERO {

@@ -55,9 +55,15 @@ extern int yydebug;
     ABRE_COLCHETE = 265,
     FECHA_COLCHETE = 266,
     VEZES_T = 267,
-    VEZES_P = 268,
-    NUMERO = 269,
-    SOMA = 270
+    DIVIDIDO_T = 268,
+    VEZES_P = 269,
+    DIVIDIDO_P = 270,
+    VEZES_L = 271,
+    DIVIDIDO_L = 272,
+    VEZES_C = 273,
+    DIVIDIDO_C = 274,
+    NUMERO = 275,
+    SOMA = 276
   };
 #endif
 /* Tokens.  */
@@ -71,9 +77,15 @@ extern int yydebug;
 #define ABRE_COLCHETE 265
 #define FECHA_COLCHETE 266
 #define VEZES_T 267
-#define VEZES_P 268
-#define NUMERO 269
-#define SOMA 270
+#define DIVIDIDO_T 268
+#define VEZES_P 269
+#define DIVIDIDO_P 270
+#define VEZES_L 271
+#define DIVIDIDO_L 272
+#define VEZES_C 273
+#define DIVIDIDO_C 274
+#define NUMERO 275
+#define SOMA 276
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
@@ -86,7 +98,7 @@ union YYSTYPE
   int     ival;
   float		float_value;
 
-#line 90 "y.tab.h" /* yacc.c:1909  */
+#line 102 "y.tab.h" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;

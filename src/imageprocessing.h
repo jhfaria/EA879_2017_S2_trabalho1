@@ -26,6 +26,10 @@ void liberar_imagem(imagem *i);
 /* funções criadas pelo grupo */
 void altera_brilho(imagem *I, float valor_ganho);
 
+void altera_brilho_por_linhas(imagem *I, float valor_ganho);
+
+void altera_brilho_por_colunas(imagem *I, float valor_ganho);
+
 void valor_maximo(imagem *I);
 
 void *multMatrixthread(void * parameterTh);

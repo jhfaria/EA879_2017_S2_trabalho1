@@ -64,8 +64,32 @@ void yyerror(char *);
 		return VEZES_T;
 	}
 
+\/[t]  {
+		return DIVIDIDO_T;
+	}
+
 \*[p]  {
 		return VEZES_P;
+	}
+
+\/[p]  {
+		return DIVIDIDO_P;
+	}
+
+\*[l]  {
+		return VEZES_L;
+	}
+
+\/[l]  {
+		return DIVIDIDO_L;
+	}
+
+\*[c]  {
+		return VEZES_C;
+	}
+
+\/[c]  {
+		return DIVIDIDO_C;
 	}
 
 .     {printf("**%s**\n", yytext);
