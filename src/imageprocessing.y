@@ -43,13 +43,27 @@ EXPRESSAO:
       newThreads(&I, $5);
       salvar_imagem($1, &I);
       liberar_imagem(&I);
-
     }
 
     | STRING IGUAL STRING DIVIDIDO_T NUMERO {
       /* estrutura para aumentar o brilho e salvar em um arquivo diferente usando threads */
       imagem I = abrir_imagem($3);
       newThreads(&I, 1/$5);
+      salvar_imagem($1, &I);
+    }
+
+    | STRING IGUAL STRING DIVIDIDO_P NUMERO {
+      /* estrutura para aumentar o brilho e salvar em um arquivo diferente usando threads */
+      imagem I = abrir_imagem($3);
+      altera_brilho_multi_process(&I, $5);
+      salvar_imagem($1, &I);
+      liberar_imagem(&I);
+    }
+
+    | STRING IGUAL STRING VEZES_P NUMERO {
+      /* estrutura para aumentar o brilho e salvar em um arquivo diferente usando threads */
+      imagem I = abrir_imagem($3);
+      altera_brilho_multi_process(&I, $5);
       salvar_imagem($1, &I);
       liberar_imagem(&I);
     }

@@ -36,4 +36,6 @@ void *multMatrixthread(void * parameterTh);
 
 void newThreads(imagem *I, float valor_ganho);
 
+void altera_brilho_multi_process(imagem *I, float valor_ganho);
+
 #endif

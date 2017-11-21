@@ -1,11 +1,14 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
-#include <sys/time.h>
 #include "imageprocessing.h"
 #include <pthread.h>
 #include <FreeImage.h>
-
+#include <unistd.h>
+#include <string.h>
+#include <sys/time.h>
+#include <sys/wait.h>
+#include <sys/mman.h>
 /*
 imagem abrir_imagem(char *nome_do_arquivo);
 void salvar_imagem(char *nome_do_arquivo);
@@ -27,7 +30,7 @@ imagem abrir_imagem(char *nome_do_arquivo)
 	}
 	else
 	{
-	    printf("Arquivo lido corretamente!\n");
+		printf("Arquivo lido corretamente!\n");
 	}
 
 	x = FreeImage_GetWidth(bitmapIn);
@@ -42,17 +45,17 @@ imagem abrir_imagem(char *nome_do_arquivo)
 
 	for (int i=0; i<x; i++)
 	{
-	    for (int j=0; j <y; j++)
-	    {
-		    int idx;
-	    	FreeImage_GetPixelColor(bitmapIn, i, j, &color);
+		for (int j=0; j <y; j++)
+		{
+			int idx;
+			FreeImage_GetPixelColor(bitmapIn, i, j, &color);
 
-	        idx = i + (j*x);
+			idx = i + (j*x);
 
-	        I.r[idx] = color.rgbRed;
-	        I.g[idx] = color.rgbGreen;
-	        I.b[idx] = color.rgbBlue;
-	    }
+			I.r[idx] = color.rgbRed;
+			I.g[idx] = color.rgbGreen;
+			I.b[idx] = color.rgbBlue;
+		}
 	}
 
 	return I;
@@ -76,18 +79,18 @@ void salvar_imagem(char *nome_do_arquivo, imagem *I)
 
    	for (int i=0; i<I->width; i++)
    	{
-    	for (int j=0; j<I->height; j++)
-    	{
-      		int idx;
+		for (int j=0; j<I->height; j++)
+		{
+	  		int idx;
 
 
-      		idx = i + (j*I->width);
-      		color.rgbRed = I->r[idx];
-      		color.rgbGreen = I->g[idx];
-      		color.rgbBlue = I->b[idx];
+	  		idx = i + (j*I->width);
+	  		color.rgbRed = I->r[idx];
+	  		color.rgbGreen = I->g[idx];
+	  		color.rgbBlue = I->b[idx];
 
-      		FreeImage_SetPixelColor(bitmapOut, i, j, &color);
-    	}
+	  		FreeImage_SetPixelColor(bitmapOut, i, j, &color);
+		}
   	}
 
   FreeImage_Save(FIF_JPEG, bitmapOut, nome_do_arquivo, JPEG_DEFAULT);
@@ -106,31 +109,31 @@ void altera_brilho(imagem *I, float valor_ganho)
 	/* laço para alcançar todos os pixels da imagem */
 	for (int i=0; i<I->width; i++)
 	{
-     	for (int j=0; j<I->height; j++)
-     	{
-	      	int idx;
+	 	for (int j=0; j<I->height; j++)
+	 	{
+		  	int idx;
 
-	      	idx = i + (j*I->width);
+		  	idx = i + (j*I->width);
 
-		    /* para a parte vermelha do pixel */
+			/* para a parte vermelha do pixel */
 			if ((I->r[idx] * valor_ganho) <= 255) {I->r[idx] = (I->r[idx] * valor_ganho);}
-		    else {I->r[idx] = 255;}
+			else {I->r[idx] = 255;}
 
-		    /* para a parte verde do pixel */
+			/* para a parte verde do pixel */
 			if ((I->g[idx] * valor_ganho) <= 255) {I->g[idx] = (I->g[idx] * valor_ganho);}
-		    else {I->g[idx] = 255;}
+			else {I->g[idx] = 255;}
 
-		    /* para a parte azul do pixel */
+			/* para a parte azul do pixel */
 			if ((I->b[idx] * valor_ganho) <= 255) {I->b[idx] = (I->b[idx] * valor_ganho);}
-		    else {I->b[idx] = 255;}
+			else {I->b[idx] = 255;}
 	   	}
   	}
 		/*checa o tempo no final */
 		gettimeofday(&t2, NULL);
 
 		/* calcula o tempo transcorrido */
-		deltat = (t2.tv_sec - t1.tv_sec) * 1000.0;      // sec to ms
-    	deltat += (t2.tv_usec - t1.tv_usec) / 1000.0;   // us to ms
+		deltat = (t2.tv_sec - t1.tv_sec) * 1000.0;	  // sec to ms
+		deltat += (t2.tv_usec - t1.tv_usec) / 1000.0;   // us to ms
 
 		/* imprime o tempo de execucao */
 		printf("Tempo de execução [ms]: %f\n", deltat);
@@ -151,31 +154,31 @@ void altera_brilho_por_linhas(imagem *I, float valor_ganho)
 	/* laço para alcançar todos os pixels da imagem */
 	for (int i=0; i<I->width; i++)
 	{
-     	for (int j=0; j<I->height; j++)
-     	{
-	      	int idx;
+	 	for (int j=0; j<I->height; j++)
+	 	{
+		  	int idx;
 
-	      	idx = i + (j*I->width);
+		  	idx = i + (j*I->width);
 
-		    /* para a parte vermelha do pixel */
+			/* para a parte vermelha do pixel */
 			if ((I->r[idx] * valor_ganho) <= 255) {I->r[idx] = (I->r[idx] * valor_ganho);}
-		    else {I->r[idx] = 255;}
+			else {I->r[idx] = 255;}
 
-		    /* para a parte verde do pixel */
+			/* para a parte verde do pixel */
 			if ((I->g[idx] * valor_ganho) <= 255) {I->g[idx] = (I->g[idx] * valor_ganho);}
-		    else {I->g[idx] = 255;}
+			else {I->g[idx] = 255;}
 
-		    /* para a parte azul do pixel */
+			/* para a parte azul do pixel */
 			if ((I->b[idx] * valor_ganho) <= 255) {I->b[idx] = (I->b[idx] * valor_ganho);}
-		    else {I->b[idx] = 255;}
+			else {I->b[idx] = 255;}
 	   	}
   	}
 		/*checa o tempo no final */
 		gettimeofday(&t2, NULL);
 
 		/* calcula o tempo transcorrido */
-		deltat = (t2.tv_sec - t1.tv_sec) * 1000.0;      // sec to ms
-    	deltat += (t2.tv_usec - t1.tv_usec) / 1000.0;   // us to ms
+		deltat = (t2.tv_sec - t1.tv_sec) * 1000.0;	  // sec to ms
+		deltat += (t2.tv_usec - t1.tv_usec) / 1000.0;   // us to ms
 
 		/* imprime o tempo de execucao */
 		printf("Tempo de execução (varrendo por linhas): %f [ms]\n", deltat);
@@ -196,31 +199,31 @@ void altera_brilho_por_colunas(imagem *I, float valor_ganho)
 	/* laço para alcançar todos os pixels da imagem */
 	for (int j=0; j<I->height; j++)
 	{
-     	for (int i=0; i<I->width; i++)
-     	{
-	      	int idx;
+	 	for (int i=0; i<I->width; i++)
+	 	{
+		  	int idx;
 
-	      	idx = i + (j*I->width);
+		  	idx = i + (j*I->width);
 
-		    /* para a parte vermelha do pixel */
+			/* para a parte vermelha do pixel */
 			if ((I->r[idx] * valor_ganho) <= 255) {I->r[idx] = (I->r[idx] * valor_ganho);}
-		    else {I->r[idx] = 255;}
+			else {I->r[idx] = 255;}
 
-		    /* para a parte verde do pixel */
+			/* para a parte verde do pixel */
 			if ((I->g[idx] * valor_ganho) <= 255) {I->g[idx] = (I->g[idx] * valor_ganho);}
-		    else {I->g[idx] = 255;}
+			else {I->g[idx] = 255;}
 
-		    /* para a parte azul do pixel */
+			/* para a parte azul do pixel */
 			if ((I->b[idx] * valor_ganho) <= 255) {I->b[idx] = (I->b[idx] * valor_ganho);}
-		    else {I->b[idx] = 255;}
+			else {I->b[idx] = 255;}
 	   	}
   	}
 		/*checa o tempo no final */
 		gettimeofday(&t2, NULL);
 
 		/* calcula o tempo transcorrido */
-		deltat = (t2.tv_sec - t1.tv_sec) * 1000.0;      // sec to ms
-    	deltat += (t2.tv_usec - t1.tv_usec) / 1000.0;   // us to ms
+		deltat = (t2.tv_sec - t1.tv_sec) * 1000.0;	  // sec to ms
+		deltat += (t2.tv_usec - t1.tv_usec) / 1000.0;   // us to ms
 
 		/* imprime o tempo de execucao */
 		printf("Tempo de execução (varrendo por colunas): %f [ms]\n", deltat);
@@ -236,18 +239,18 @@ void valor_maximo(imagem *I)
 	/* laço para alcançar todos os pixels da imagem */
 	for (int i=0; i<I->width; i++)
 	{
-     	for (int j=0; j<I->height; j++)
-     	{
-	      	int idx;
+	 	for (int j=0; j<I->height; j++)
+	 	{
+		  	int idx;
 
-	      	int valor_aux;
+		  	int valor_aux;
 
-	      	idx = i + (j*I->width);
+		  	idx = i + (j*I->width);
 
-	      	valor_aux = sqrt(pow(I->r[idx], 2.0) + pow(I->g[idx], 2.0) + pow(I->b[idx], 2.0));
+		  	valor_aux = sqrt(pow(I->r[idx], 2.0) + pow(I->g[idx], 2.0) + pow(I->b[idx], 2.0));
 
-	      	if (valor_aux > valor_maximo) {valor_maximo = valor_aux;}
-    	}
+		  	if (valor_aux > valor_maximo) {valor_maximo = valor_aux;}
+		}
   	}
 
   	/* imprime o valor máximo */
@@ -345,7 +348,7 @@ void newThreads(imagem *I, float valor_ganho)
 		{
 		//rotina de erro
 			printf("ERROR; return code from pthread_create() is %d\n", rc);
-		    exit(-1);
+			exit(-1);
 		}
 
 		//fica preso aqui ate que a thread tenha recuperado todo argumento
@@ -359,7 +362,7 @@ void newThreads(imagem *I, float valor_ganho)
 	gettimeofday(&t2, NULL);
 
 	//calcula o tempo transcorrido
-	deltat = (t2.tv_sec - t1.tv_sec) * 1000.0;      // s para ms
+	deltat = (t2.tv_sec - t1.tv_sec) * 1000.0;	  // s para ms
 	deltat += (t2.tv_usec - t1.tv_usec) / 1000.0;   // us para ms
 	
 	/* imprime o tempo de execucao */
@@ -367,3 +370,78 @@ void newThreads(imagem *I, float valor_ganho)
 
 	return;
  }
+
+/* função para alterar o brilho da imagem (varrendo linhas)*/
+void altera_brilho_multi_process(imagem *I, float valor_ganho)
+{
+	/* contagem do tempo de execucao */
+	struct timeval t1, t2;
+	double deltat;
+
+	/* checa o tempo no inicio */
+	gettimeofday(&t1, NULL);
+
+	int i, j, k, n;
+
+	pid_t childs[2];
+
+	int first_value, last_value;	
+
+	imagem *I_fork;
+
+	I_fork = (imagem *) mmap(NULL, sizeof(*I),  PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANON, 0, 0);
+
+	memcpy(&I_fork, &I, sizeof I);
+
+	n = 2;
+
+	for(k=0; k<n; k++)
+	{
+		childs[k] = fork();
+
+		if(childs[k] == 0)
+		{
+			first_value = k * I_fork->width/n;
+			last_value  = k * I_fork->width/n + I_fork->width/n;
+
+			/* laço para alcançar todos os pixels da imagem */
+			for(i=first_value; i<last_value; i++)
+			{
+			 	for(j=0; j<I_fork->height; j++)
+			 	{
+				  	int idx;
+
+				  	idx = i + (j*I_fork->width);
+
+					/* para a parte vermelha do pixel */
+					if ((I_fork->r[idx] * valor_ganho) <= 255) {I_fork->r[idx] = (I_fork->r[idx] * valor_ganho);}
+					else {I_fork->r[idx] = 255;}
+
+					/* para a parte verde do pixel */
+					if ((I_fork->g[idx] * valor_ganho) <= 255) {I_fork->g[idx] = (I_fork->g[idx] * valor_ganho);}
+					else {I_fork->g[idx] = 255;}
+
+					/* para a parte azul do pixel */
+					if ((I_fork->b[idx] * valor_ganho) <= 255) {I_fork->b[idx] = (I_fork->b[idx] * valor_ganho);}
+					else {I_fork->b[idx] = 255;}
+			   	}
+		  	}
+		}			
+	}
+
+	wait(NULL);
+
+	memcpy(&I, &I_fork, sizeof I);
+
+  	/*checa o tempo no final */
+	gettimeofday(&t2, NULL);
+
+	/* calcula o tempo transcorrido */
+	deltat = (t2.tv_sec - t1.tv_sec) * 1000.0;	  // sec to ms
+	deltat += (t2.tv_usec - t1.tv_usec) / 1000.0;   // us to ms
+
+	/* imprime o tempo de execucao */
+	printf("Tempo de execução [ms]: %f\n", deltat);
+
+	return;
+}
