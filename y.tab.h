@@ -92,11 +92,11 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 12 "./src/imageprocessing.y" /* yacc.c:1909  */
+#line 13 "./src/imageprocessing.y" /* yacc.c:1909  */
 
-  char    strval[50];
-  int     ival;
-  float		float_value;
+	char  strval[50];
+	int	  ival;
+	float float_value;
 
 #line 102 "y.tab.h" /* yacc.c:1909  */
 };

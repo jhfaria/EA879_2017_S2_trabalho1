@@ -1,19 +1,14 @@
-#include <stdlib.h>
-#include <stdio.h>
 #include <math.h>
-#include "imageprocessing.h"
-#include <pthread.h>
-#include <FreeImage.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
-#include <string.h>
+#include <pthread.h>
 #include <sys/time.h>
 #include <sys/wait.h>
 #include <sys/mman.h>
-/*
-imagem abrir_imagem(char *nome_do_arquivo);
-void salvar_imagem(char *nome_do_arquivo);
-void liberar_imagem(imagem *i);
- */
+#include <FreeImage.h>
+#include "imageprocessing.h"
+
 
 imagem abrir_imagem(char *nome_do_arquivo)
 {
@@ -39,9 +34,14 @@ imagem abrir_imagem(char *nome_do_arquivo)
 	I.width = x;
 	I.height = y;
 
-	I.r = malloc(sizeof(float) * x * y);
-	I.g = malloc(sizeof(float) * x * y);
-	I.b = malloc(sizeof(float) * x * y);
+	// I.r = malloc(sizeof(float) * x * y);
+	// I.g = malloc(sizeof(float) * x * y);
+	// I.b = malloc(sizeof(float) * x * y);
+
+	/* mapeia os vetores de cores na memória */
+	I.r = (float *) mmap(NULL, sizeof(float) * x * y,  PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANON, 0, 0);
+	I.g = (float *) mmap(NULL, sizeof(float) * x * y,  PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANON, 0, 0);
+	I.b = (float *) mmap(NULL, sizeof(float) * x * y,  PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANON, 0, 0);
 
 	for (int i=0; i<x; i++)
 	{
@@ -61,51 +61,50 @@ imagem abrir_imagem(char *nome_do_arquivo)
 	return I;
 }
 
+
 void liberar_imagem(imagem *I)
 {
-  free(I->r);
-  free(I->g);
-  free(I->b);
+	// free(I->r);
+	// free(I->g);
+	// free(I->b);
+
+	/* desmapeia a memória */
+	munmap(I->r, sizeof(float));
+	munmap(I->g, sizeof(float));
+	munmap(I->b, sizeof(float));
 }
+
 
 void salvar_imagem(char *nome_do_arquivo, imagem *I)
 {
- 	FIBITMAP *bitmapOut;
-  	RGBQUAD color;
+	FIBITMAP *bitmapOut;
+	RGBQUAD color;
 
-  	printf("Salvando imagem %d por %d...\n", I->width, I->height);
+	printf("Salvando imagem %d por %d...\n", I->width, I->height);
 
-  	bitmapOut = FreeImage_Allocate(I->width, I->height, 24, 0, 0, 0);
+	bitmapOut = FreeImage_Allocate(I->width, I->height, 24, 0, 0, 0);
 
-   	for (int i=0; i<I->width; i++)
-   	{
+	for (int i=0; i<I->width; i++)
+	{
 		for (int j=0; j<I->height; j++)
 		{
-	  		int idx;
+				int idx;
 
+				idx = i + (j*I->width);
+				color.rgbRed = I->r[idx];
+				color.rgbGreen = I->g[idx];
+				color.rgbBlue = I->b[idx];
 
-	  		idx = i + (j*I->width);
-	  		color.rgbRed = I->r[idx];
-	  		color.rgbGreen = I->g[idx];
-	  		color.rgbBlue = I->b[idx];
-
-	  		FreeImage_SetPixelColor(bitmapOut, i, j, &color);
+				FreeImage_SetPixelColor(bitmapOut, i, j, &color);
 		}
-  	}
+	}
 
-  FreeImage_Save(FIF_JPEG, bitmapOut, nome_do_arquivo, JPEG_DEFAULT);
+	FreeImage_Save(FIF_JPEG, bitmapOut, nome_do_arquivo, JPEG_DEFAULT);
 }
 
 /* função para alterar o brilho da imagem (varrendo linhas)*/
 void altera_brilho(imagem *I, float valor_ganho)
 {
-	/* contagem do tempo de execucao */
-	struct timeval t1, t2;
-	double deltat;
-
-	/* checa o tempo no inicio */
-	gettimeofday(&t1, NULL);
-
 	/* laço para alcançar todos os pixels da imagem */
 	for (int i=0; i<I->width; i++)
 	{
@@ -128,105 +127,6 @@ void altera_brilho(imagem *I, float valor_ganho)
 			else {I->b[idx] = 255;}
 	   	}
   	}
-		/*checa o tempo no final */
-		gettimeofday(&t2, NULL);
-
-		/* calcula o tempo transcorrido */
-		deltat = (t2.tv_sec - t1.tv_sec) * 1000.0;	  // sec to ms
-		deltat += (t2.tv_usec - t1.tv_usec) / 1000.0;   // us to ms
-
-		/* imprime o tempo de execucao */
-		printf("Tempo de execução [ms]: %f\n", deltat);
-
-	return;
-}
-
-/* função para alterar o brilho da imagem (varrendo linhas)*/
-void altera_brilho_por_linhas(imagem *I, float valor_ganho)
-{
-	/* contagem do tempo de execucao */
-	struct timeval t1, t2;
-	double deltat;
-
-	/* checa o tempo no inicio */
-	gettimeofday(&t1, NULL);
-
-	/* laço para alcançar todos os pixels da imagem */
-	for (int i=0; i<I->width; i++)
-	{
-	 	for (int j=0; j<I->height; j++)
-	 	{
-		  	int idx;
-
-		  	idx = i + (j*I->width);
-
-			/* para a parte vermelha do pixel */
-			if ((I->r[idx] * valor_ganho) <= 255) {I->r[idx] = (I->r[idx] * valor_ganho);}
-			else {I->r[idx] = 255;}
-
-			/* para a parte verde do pixel */
-			if ((I->g[idx] * valor_ganho) <= 255) {I->g[idx] = (I->g[idx] * valor_ganho);}
-			else {I->g[idx] = 255;}
-
-			/* para a parte azul do pixel */
-			if ((I->b[idx] * valor_ganho) <= 255) {I->b[idx] = (I->b[idx] * valor_ganho);}
-			else {I->b[idx] = 255;}
-	   	}
-  	}
-		/*checa o tempo no final */
-		gettimeofday(&t2, NULL);
-
-		/* calcula o tempo transcorrido */
-		deltat = (t2.tv_sec - t1.tv_sec) * 1000.0;	  // sec to ms
-		deltat += (t2.tv_usec - t1.tv_usec) / 1000.0;   // us to ms
-
-		/* imprime o tempo de execucao */
-		printf("Tempo de execução (varrendo por linhas): %f [ms]\n", deltat);
-
-	return;
-}
-
-/* função para alterar o brilho da imagem (varrendo colunas)*/
-void altera_brilho_por_colunas(imagem *I, float valor_ganho)
-{
-	/* contagem do tempo de execucao */
-	struct timeval t1, t2;
-	double deltat;
-
-	/* checa o tempo no inicio */
-	gettimeofday(&t1, NULL);
-
-	/* laço para alcançar todos os pixels da imagem */
-	for (int j=0; j<I->height; j++)
-	{
-	 	for (int i=0; i<I->width; i++)
-	 	{
-		  	int idx;
-
-		  	idx = i + (j*I->width);
-
-			/* para a parte vermelha do pixel */
-			if ((I->r[idx] * valor_ganho) <= 255) {I->r[idx] = (I->r[idx] * valor_ganho);}
-			else {I->r[idx] = 255;}
-
-			/* para a parte verde do pixel */
-			if ((I->g[idx] * valor_ganho) <= 255) {I->g[idx] = (I->g[idx] * valor_ganho);}
-			else {I->g[idx] = 255;}
-
-			/* para a parte azul do pixel */
-			if ((I->b[idx] * valor_ganho) <= 255) {I->b[idx] = (I->b[idx] * valor_ganho);}
-			else {I->b[idx] = 255;}
-	   	}
-  	}
-		/*checa o tempo no final */
-		gettimeofday(&t2, NULL);
-
-		/* calcula o tempo transcorrido */
-		deltat = (t2.tv_sec - t1.tv_sec) * 1000.0;	  // sec to ms
-		deltat += (t2.tv_usec - t1.tv_usec) / 1000.0;   // us to ms
-
-		/* imprime o tempo de execucao */
-		printf("Tempo de execução (varrendo por colunas): %f [ms]\n", deltat);
 
 	return;
 }
@@ -259,72 +159,194 @@ void valor_maximo(imagem *I)
 	return;
 }
 
-void * multMatrixthread(void * parameterTh)
- {
-  	//recupera o argumento da thread
-	strThread * parameterThread;
-	parameterThread = (strThread *)parameterTh;
-	// recupera o thread id
-	long tid = parameterThread->t;
-	//recupera o ganho
-	float valor_ganho = parameterThread->ganho;
-	//diz pra main que pode criar outra thread, ja que essa aqui já pegou tudo
-	parameterThread->flag = 1;
+/******* TRABALHO 2 *******/
 
-	//job eh o numero de trabalhos que a thread deve fazer
-	int jobs;
-	//se for a ultima e o numer de trabalhos nao for multiplo do numero de threads, a ultma faz o que sobra
-	if (tid == (NUM_THREADS - 1))
-			jobs = parameterThread->width*parameterThread->height/NUM_THREADS + (parameterThread->width*parameterThread->height)%NUM_THREADS;
-	else
-		  jobs = parameterThread->width*parameterThread->height/NUM_THREADS;
+/* função para alterar o brilho da imagem (varrendo linhas)*/
+void altera_brilho_por_linhas(imagem *I, float valor_ganho)
+{
+	/* contagem do tempo de execução */
+	struct timeval t1, t2;
+	double deltat;
 
-	// trabalhos das outras thread que a thread deve pular
-	int jobsdone =  parameterThread->width*parameterThread->height/NUM_THREADS * tid;
+	/* checa o tempo no inicio */
+	gettimeofday(&t1, NULL);
 
+	/* laço para alcançar todos os pixels da imagem */
+	for (int i=0; i<I->width; i++)
+	{
+	 	for (int j=0; j<I->height; j++)
+	 	{
+		  	int idx;
 
-	//executa o seu lote de trabalho
-	for (int i = 0; i < jobs; i++) {
+		  	idx = i + (j*I->width);
 
 			/* para a parte vermelha do pixel */
-			if ((parameterThread->r[i+jobsdone] * valor_ganho) <= 255)
-					parameterThread->r[i+jobsdone] = (parameterThread->r[i+jobsdone] * valor_ganho);
-			else
-					parameterThread->r[i+jobsdone] = 255;
+			if ((I->r[idx] * valor_ganho) <= 255) {I->r[idx] = (I->r[idx] * valor_ganho);}
+			else {I->r[idx] = 255;}
 
 			/* para a parte verde do pixel */
-			if ((parameterThread->g[i+jobsdone] * valor_ganho) <= 255)
-					parameterThread->g[i+jobsdone] = (parameterThread->g[i+jobsdone] * valor_ganho);
-			else
-					parameterThread->g[i+jobsdone] = 255;
+			if ((I->g[idx] * valor_ganho) <= 255) {I->g[idx] = (I->g[idx] * valor_ganho);}
+			else {I->g[idx] = 255;}
 
 			/* para a parte azul do pixel */
-			if ((parameterThread->b[i+jobsdone] * valor_ganho) <= 255)
-				parameterThread->b[i+jobsdone] = (parameterThread->b[i+jobsdone] * valor_ganho);
-			else
-					parameterThread->b[i+jobsdone] = 255;
+			if ((I->b[idx] * valor_ganho) <= 255) {I->b[idx] = (I->b[idx] * valor_ganho);}
+			else {I->b[idx] = 255;}
+	   	}
+  	}
 
+	/* checa o tempo no final */
+	gettimeofday(&t2, NULL);
+
+	/* calcula o tempo transcorrido */
+	deltat = (t2.tv_sec - t1.tv_sec) * 1000.0;	  // sec to ms
+	deltat += (t2.tv_usec - t1.tv_usec) / 1000.0;   // us to ms
+
+	/* imprime o tempo de execução */
+	printf("Tempo de execução (varrendo por linhas): %f [ms]\n", deltat);
+
+	return;
+}
+
+
+/* função para alterar o brilho da imagem (varrendo colunas)*/
+void altera_brilho_por_colunas(imagem *I, float valor_ganho)
+{
+	/* contagem do tempo de execução */
+	struct timeval t1, t2;
+	double deltat;
+
+	/* checa o tempo no início */
+	gettimeofday(&t1, NULL);
+
+	/* laço para alcançar todos os pixels da imagem */
+	for (int j=0; j<I->height; j++)
+	{
+	 	for (int i=0; i<I->width; i++)
+	 	{
+		  	int idx;
+
+		  	idx = i + (j*I->width);
+
+			/* para a parte vermelha do pixel */
+			if ((I->r[idx] * valor_ganho) <= 255) {I->r[idx] = (I->r[idx] * valor_ganho);}
+			else {I->r[idx] = 255;}
+
+			/* para a parte verde do pixel */
+			if ((I->g[idx] * valor_ganho) <= 255) {I->g[idx] = (I->g[idx] * valor_ganho);}
+			else {I->g[idx] = 255;}
+
+			/* para a parte azul do pixel */
+			if ((I->b[idx] * valor_ganho) <= 255) {I->b[idx] = (I->b[idx] * valor_ganho);}
+			else {I->b[idx] = 255;}
+	   	}
+  	}
+
+	/* checa o tempo no final */
+	gettimeofday(&t2, NULL);
+
+	/* calcula o tempo transcorrido */
+	deltat = (t2.tv_sec - t1.tv_sec) * 1000.0;	  // sec to ms
+	deltat += (t2.tv_usec - t1.tv_usec) / 1000.0;   // us to ms
+
+	/* imprime o tempo de execução */
+	printf("Tempo de execução (varrendo por colunas): %f [ms]\n", deltat);
+
+	return;
+}
+
+
+void * multMatrixthread(void * parameterTh)
+ {
+  	/* recupera o argumento da thread */
+	strThread * parameterThread;
+	parameterThread = (strThread *)parameterTh;
+	
+	/* recupera o thread ID */
+	long tid = parameterThread->t;
+
+	/* recupera o ganho */
+	float valor_ganho = parameterThread->ganho;
+
+	/* diz pra main que pode criar outra thread, já que essa aqui já pegou tudo */
+	parameterThread->flag = 1;
+
+	/* job é o numero de trabalhos que a thread deve fazer */
+	int jobs;
+	
+	/* se for a última e o número de trabalhos não for múltiplo do número de threads, a última faz o que sobra */
+	if (tid == (NUM_THREADS - 1))
+	{
+		jobs = parameterThread->width*parameterThread->height/NUM_THREADS + (parameterThread->width*parameterThread->height)%NUM_THREADS;
+	}
+
+	else
+	{
+		jobs = parameterThread->width*parameterThread->height/NUM_THREADS;
+	}
+
+	/* trabalhos das outras threads que a thread deve pular */
+	int jobsdone =  parameterThread->width*parameterThread->height/NUM_THREADS * tid;
+
+	/* executa o seu lote de trabalho */
+	for (int i = 0; i < jobs; i++) 
+	{
+		/* para a parte vermelha do pixel */
+		if ((parameterThread->r[i+jobsdone] * valor_ganho) <= 255)
+		{
+			parameterThread->r[i+jobsdone] = (parameterThread->r[i+jobsdone] * valor_ganho);
 		}
-	//avisa a main que acabou o trabalho
+
+		else
+		{
+			parameterThread->r[i+jobsdone] = 255;
+		}
+
+		/* para a parte verde do pixel */
+		if ((parameterThread->g[i+jobsdone] * valor_ganho) <= 255)
+		{
+			parameterThread->g[i+jobsdone] = (parameterThread->g[i+jobsdone] * valor_ganho);
+		}
+
+		else
+		{
+			parameterThread->g[i+jobsdone] = 255;
+		}
+
+		/* para a parte azul do pixel */
+		if ((parameterThread->b[i+jobsdone] * valor_ganho) <= 255)
+		{
+			parameterThread->b[i+jobsdone] = (parameterThread->b[i+jobsdone] * valor_ganho);
+		}
+
+		else
+		{
+			parameterThread->b[i+jobsdone] = 255;
+		}
+	}
+
+	/* avisa a main que acabou o trabalho */
 	parameterThread->flagend++;
 
 	return NULL;
- }
+}
+
 
 void newThreads(imagem *I, float valor_ganho)
 {
-	// contagem do tempo de execucao
+	/* contagem do tempo de execução */
 	struct timeval t1, t2;
 	double deltat;
-	//checa o tempo no inicio
+
+	/* checa o tempo no início */
 	gettimeofday(&t1, NULL);
 
-	//cria NUM_THREADS threads
+	/* cria NUM_THREADS threads */
 	pthread_t threads[NUM_THREADS];
 	int rc;
+
 	strThread parameterThread;
 
-	//copia a struct img para outra struct contendo outros parametros, pois so podemos passar um argumento pra thread
+	/* copia a struct img para outra struct contendo outros parâmetros, pois só podemos passar um argumento para a thread */
 	parameterThread.width = I->width;
 	parameterThread.height = I->height;
 	parameterThread.r = &(I->r[0]);
@@ -333,105 +355,106 @@ void newThreads(imagem *I, float valor_ganho)
 	parameterThread.ganho = valor_ganho;
 	parameterThread.flagend = 0;
 
-	//o argumento deve ser um ponteiro
+	/* o argumento deve ser um ponteiro */
 	void * argumento = &parameterThread;
 
-	// crio as threads
-	for((parameterThread.t)=0; (parameterThread.t)<NUM_THREADS; (parameterThread.t)++)
+	/* cria as threads */
+	for ((parameterThread.t)=0; (parameterThread.t)<NUM_THREADS; (parameterThread.t)++)
 	{
-		// condicao para recuperacao do argumento sem que ele mude no meio do caminho
+		/* condição para a recuperação do argumento sem que ele mude no meio do caminho */
 		parameterThread.flag = 0;
-		//cria a thread com id parameterThread.t e rotina multMatrixthread com argumento 'argumento'
+
+		/* cria a thread com ID parameterThread.t e rotina multMatrixthread com argumento 'argumento' */
 		rc = pthread_create(&threads[parameterThread.t], NULL, multMatrixthread, argumento);
 		
 		if(rc)
 		{
-		//rotina de erro
+			/* rotina de erro */
 			printf("ERROR; return code from pthread_create() is %d\n", rc);
 			exit(-1);
 		}
 
-		//fica preso aqui ate que a thread tenha recuperado todo argumento
+		/* fica preso aqui ate que a thread tenha recuperado todo argumento */
 		while (!parameterThread.flag);
 	}
 
-	//fica preso aqui até a thread terminar SE ACHAR OUTRA COISA, É MELHOR
+	/* fica preso aqui até a thread terminar */
 	while (parameterThread.flagend != NUM_THREADS);
 
-	//checa o tempo no final
+	/* checa o tempo no final */
 	gettimeofday(&t2, NULL);
 
-	//calcula o tempo transcorrido
+	/* calcula o tempo transcorrido */
 	deltat = (t2.tv_sec - t1.tv_sec) * 1000.0;	  // s para ms
 	deltat += (t2.tv_usec - t1.tv_usec) / 1000.0;   // us para ms
 	
-	/* imprime o tempo de execucao */
+	/* imprime o tempo de execução */
 	printf("Tempo de execução (usando threads): %f [ms]\n", deltat);
 
 	return;
- }
+}
 
-/* função para alterar o brilho da imagem (varrendo linhas)*/
+
+/* função para alterar o brilho da imagem (por vários processos)*/
 void altera_brilho_multi_process(imagem *I, float valor_ganho)
 {
-	/* contagem do tempo de execucao */
+	/* contagem do tempo de execução */
 	struct timeval t1, t2;
 	double deltat;
 
-	/* checa o tempo no inicio */
+	/* checa o tempo no início */
 	gettimeofday(&t1, NULL);
 
 	int i, j, k, n;
 
-	pid_t childs[2];
-
 	int first_value, last_value;	
 
-	imagem *I_fork;
+	/* número de processos filhos criados */
+	n = 7;
 
-	I_fork = (imagem *) mmap(NULL, sizeof(*I),  PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANON, 0, 0);
-
-	memcpy(&I_fork, &I, sizeof I);
-
-	n = 2;
+	pid_t childs[n];
 
 	for(k=0; k<n; k++)
 	{
+		/* cria um processo filho */
 		childs[k] = fork();
 
 		if(childs[k] == 0)
 		{
-			first_value = k * I_fork->width/n;
-			last_value  = k * I_fork->width/n + I_fork->width/n;
+			/* define os pixels que o processo filho altera */
+			first_value = k * I->width/n;
+			last_value  = k * I->width/n + I->width/n;
 
 			/* laço para alcançar todos os pixels da imagem */
 			for(i=first_value; i<last_value; i++)
 			{
-			 	for(j=0; j<I_fork->height; j++)
+			 	for(j=0; j<I->height; j++)
 			 	{
 				  	int idx;
 
-				  	idx = i + (j*I_fork->width);
+				  	idx = i + (j*I->width);
 
 					/* para a parte vermelha do pixel */
-					if ((I_fork->r[idx] * valor_ganho) <= 255) {I_fork->r[idx] = (I_fork->r[idx] * valor_ganho);}
-					else {I_fork->r[idx] = 255;}
+					if ((I->r[idx] * valor_ganho) <= 255) {I->r[idx] = (I->r[idx] * valor_ganho);}
+					else {I->r[idx] = 255;}
 
 					/* para a parte verde do pixel */
-					if ((I_fork->g[idx] * valor_ganho) <= 255) {I_fork->g[idx] = (I_fork->g[idx] * valor_ganho);}
-					else {I_fork->g[idx] = 255;}
+					if ((I->g[idx] * valor_ganho) <= 255) {I->g[idx] = (I->g[idx] * valor_ganho);}
+					else {I->g[idx] = 255;}
 
 					/* para a parte azul do pixel */
-					if ((I_fork->b[idx] * valor_ganho) <= 255) {I_fork->b[idx] = (I_fork->b[idx] * valor_ganho);}
-					else {I_fork->b[idx] = 255;}
+					if ((I->b[idx] * valor_ganho) <= 255) {I->b[idx] = (I->b[idx] * valor_ganho);}
+					else {I->b[idx] = 255;}
 			   	}
 		  	}
+
+		  	/* encerra o processo filho */
+		  	_Exit(EXIT_SUCCESS);
 		}			
 	}
 
+	/* espera todos os processos filhos encerrarem */
 	wait(NULL);
-
-	memcpy(&I, &I_fork, sizeof I);
 
   	/*checa o tempo no final */
 	gettimeofday(&t2, NULL);
@@ -440,8 +463,8 @@ void altera_brilho_multi_process(imagem *I, float valor_ganho)
 	deltat = (t2.tv_sec - t1.tv_sec) * 1000.0;	  // sec to ms
 	deltat += (t2.tv_usec - t1.tv_usec) / 1000.0;   // us to ms
 
-	/* imprime o tempo de execucao */
-	printf("Tempo de execução [ms]: %f\n", deltat);
+	/* imprime o tempo de execução */
+	printf("Tempo de execução (usando processos): %f [ms]\n", deltat);
 
 	return;
 }

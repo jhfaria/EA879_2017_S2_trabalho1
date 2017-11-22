@@ -4,17 +4,17 @@
 
 typedef struct
 {
-  	unsigned int width, height;
-  	float *r, *g, *b;
+	unsigned int width, height;
+	float *r, *g, *b;
 } imagem;
 
-typedef struct {
-    unsigned int width, height;
-    float *r, *g, *b;
-    long t;
-    float ganho;
-    int flag, flagend;
-
+typedef struct 
+{
+	unsigned int width, height;
+	float *r, *g, *b;
+	long t;
+	float ganho;
+	int flag, flagend;
 } strThread;
 
 imagem abrir_imagem(char *nome_do_arquivo);
@@ -26,11 +26,13 @@ void liberar_imagem(imagem *i);
 /* funções criadas pelo grupo */
 void altera_brilho(imagem *I, float valor_ganho);
 
+void valor_maximo(imagem *I);
+
+/******* TRABALHO 2 *******/
+
 void altera_brilho_por_linhas(imagem *I, float valor_ganho);
 
 void altera_brilho_por_colunas(imagem *I, float valor_ganho);
-
-void valor_maximo(imagem *I);
 
 void *multMatrixthread(void * parameterTh);
 
