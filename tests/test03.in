@@ -1,0 +1,5 @@
+novaImagem3processos.jpg = imagem3.jpg *t 2
+novaImagem3threads.jpg = imagem3.jpg *p 2
+novaImagem3colunas.jpg = imagem3.jpg *l 2
+novaImagem3linhas.jpg = imagem3.jpg *c 2
+exit

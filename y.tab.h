@@ -54,16 +54,17 @@ extern int yydebug;
     DIVIDIDO = 264,
     ABRE_COLCHETE = 265,
     FECHA_COLCHETE = 266,
-    VEZES_T = 267,
-    DIVIDIDO_T = 268,
-    VEZES_P = 269,
-    DIVIDIDO_P = 270,
-    VEZES_L = 271,
-    DIVIDIDO_L = 272,
-    VEZES_C = 273,
-    DIVIDIDO_C = 274,
-    NUMERO = 275,
-    SOMA = 276
+    EXIT = 267,
+    VEZES_T = 268,
+    DIVIDIDO_T = 269,
+    VEZES_P = 270,
+    DIVIDIDO_P = 271,
+    VEZES_L = 272,
+    DIVIDIDO_L = 273,
+    VEZES_C = 274,
+    DIVIDIDO_C = 275,
+    NUMERO = 276,
+    SOMA = 277
   };
 #endif
 /* Tokens.  */
@@ -76,29 +77,30 @@ extern int yydebug;
 #define DIVIDIDO 264
 #define ABRE_COLCHETE 265
 #define FECHA_COLCHETE 266
-#define VEZES_T 267
-#define DIVIDIDO_T 268
-#define VEZES_P 269
-#define DIVIDIDO_P 270
-#define VEZES_L 271
-#define DIVIDIDO_L 272
-#define VEZES_C 273
-#define DIVIDIDO_C 274
-#define NUMERO 275
-#define SOMA 276
+#define EXIT 267
+#define VEZES_T 268
+#define DIVIDIDO_T 269
+#define VEZES_P 270
+#define DIVIDIDO_P 271
+#define VEZES_L 272
+#define DIVIDIDO_L 273
+#define VEZES_C 274
+#define DIVIDIDO_C 275
+#define NUMERO 276
+#define SOMA 277
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 
 union YYSTYPE
 {
-#line 13 "./src/imageprocessing.y" /* yacc.c:1909  */
+#line 14 "./src/imageprocessing.y" /* yacc.c:1909  */
 
 	char  strval[50];
 	int	  ival;
 	float float_value;
 
-#line 102 "y.tab.h" /* yacc.c:1909  */
+#line 104 "y.tab.h" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;

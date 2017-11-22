@@ -1,5 +1,6 @@
 %{
 #include <stdio.h>
+#include <stdlib.h>
 #include <pthread.h>
 #include <FreeImage.h>
 #include "imageprocessing.h"
@@ -18,7 +19,7 @@ int yylex(void);
 
 
 %token <strval> 	 STRING
-%token <ival> 		 VAR IGUAL EOL ASPA VEZES DIVIDIDO ABRE_COLCHETE FECHA_COLCHETE 
+%token <ival> 		 VAR IGUAL EOL ASPA VEZES DIVIDIDO ABRE_COLCHETE FECHA_COLCHETE EXIT
 %token <ival>		 VEZES_T DIVIDIDO_T VEZES_P DIVIDIDO_P VEZES_L DIVIDIDO_L VEZES_C DIVIDIDO_C
 %token <float_value> NUMERO
 
@@ -124,6 +125,10 @@ EXPRESSAO:
 		imagem I = abrir_imagem($2);
 		valor_maximo(&I);
 		liberar_imagem(&I);
+	}
+
+	| EXIT {
+		exit(EXIT_SUCCESS);
 	}
 	;
 %%

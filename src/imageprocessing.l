@@ -8,6 +8,10 @@ void yyerror(char *);
 
 
 %%
+exit  {
+		return EXIT;
+	}
+
 [a-z]  {
         yylval.ival = yytext[0] - 'a';
         return VAR;
