@@ -21,3 +21,4 @@ for test in files:
 		if(words[0] == "Tempo"):
 			print line
 
+os.system("mv novaI* novas_imagens/")

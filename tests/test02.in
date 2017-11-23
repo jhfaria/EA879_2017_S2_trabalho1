@@ -1,5 +1,5 @@
-novaImagem2processos.jpg = imagem2.jpg *t 2
-novaImagem2threads.jpg = imagem2.jpg *p 2
-novaImagem2colunas.jpg = imagem2jpg *l 2
+novaImagem2threads.jpg = imagem2.jpg *t 2
+novaImagem2processos.jpg = imagem2.jpg *p 2
+novaImagem2colunas.jpg = imagem2.jpg *l 2
 novaImagem2linhas.jpg = imagem2.jpg *c 2
 exit
