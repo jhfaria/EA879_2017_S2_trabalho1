@@ -453,12 +453,14 @@ void altera_brilho_multi_process(imagem *I, float valor_ganho)
 
 	int i, j, k, n;
 
-	int first_value, last_value;	
+	int passo, first_value, last_value;	
 
 	/* número de processos filhos criados */
 	n = 7;
 
 	pid_t childs[n];
+
+	passo = round(I->width/n);
 
 	for(k=0; k<n; k++)
 	{
@@ -468,8 +470,11 @@ void altera_brilho_multi_process(imagem *I, float valor_ganho)
 		if(childs[k] == 0)
 		{
 			/* define os pixels que o processo filho altera */
-			first_value = k * I->width/n;
-			last_value  = k * I->width/n + I->width/n;
+			first_value = k * passo;
+
+			last_value = first_value + passo;
+
+			if(k == (n - 1)) {last_value = I->width;}
 
 			/* laço para alcançar todos os pixels da imagem */
 			for(i=first_value; i<last_value; i++)

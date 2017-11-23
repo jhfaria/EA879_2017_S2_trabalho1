@@ -22,3 +22,4 @@ for test in files:
 			print line
 
 os.system("mv novaI* novas_imagens/")
+
