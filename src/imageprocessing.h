@@ -17,11 +17,15 @@ typedef struct
 	int flag, flagend;
 } strThread;
 
-imagem abrir_imagem(char *nome_do_arquivo);
+imagem abrir_imagem_malloc(char *nome_do_arquivo);
+
+imagem abrir_imagem_mmap(char *nome_do_arquivo);
 
 void salvar_imagem(char *nome_do_arquivo, imagem *I);
 
-void liberar_imagem(imagem *i);
+void liberar_imagem_malloc(imagem *i);
+
+void liberar_imagem_mmap(imagem *i);
 
 /* funções criadas pelo grupo */
 void altera_brilho(imagem *I, float valor_ganho);

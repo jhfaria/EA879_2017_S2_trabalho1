@@ -479,8 +479,8 @@ static const yytype_uint8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    31,    31,    32,    35,    36,    44,    52,    59,    67,
-      75,    83,    91,    99,   107,   115,   123,   130
+       0,    31,    31,    32,    35,    36,    44,    52,    60,    68,
+      76,    84,    92,   100,   108,   116,   124,   131
 };
 #endif
 
@@ -535,7 +535,7 @@ static const yytype_uint8 yydefact[] =
 {
        3,     4,     1,     0,     0,    17,     0,     0,     0,     2,
        5,    16,     0,     0,     0,     0,     0,     0,     0,     0,
-       0,     0,    14,    15,     6,     7,     9,     8,    10,    11,
+       0,     0,    14,    15,     6,     7,     8,     9,    10,    11,
       12,    13
 };
 
@@ -1271,10 +1271,10 @@ yyreduce:
 #line 36 "./src/imageprocessing.y" /* yacc.c:1646  */
     {
 		printf("Copiando %s para %s\n", (yyvsp[0].strval), (yyvsp[-2].strval));
-		imagem I = abrir_imagem((yyvsp[0].strval));
+		imagem I = abrir_imagem_malloc((yyvsp[0].strval));
 		printf("Li imagem %d por %d\n", I.width, I.height);
 		salvar_imagem((yyvsp[-2].strval), &I);
-		liberar_imagem(&I);
+		liberar_imagem_malloc(&I);
 	}
 #line 1280 "y.tab.c" /* yacc.c:1646  */
     break;
@@ -1283,10 +1283,10 @@ yyreduce:
 #line 44 "./src/imageprocessing.y" /* yacc.c:1646  */
     {
 		/* estrutura para aumentar o brilho e salvar em um arquivo diferente usando threads */
-		imagem I = abrir_imagem((yyvsp[-2].strval));
+		imagem I = abrir_imagem_malloc((yyvsp[-2].strval));
 		newThreads(&I, (yyvsp[0].float_value));
 		salvar_imagem((yyvsp[-4].strval), &I);
-		liberar_imagem(&I);
+		liberar_imagem_malloc(&I);
 	}
 #line 1292 "y.tab.c" /* yacc.c:1646  */
     break;
@@ -1295,130 +1295,131 @@ yyreduce:
 #line 52 "./src/imageprocessing.y" /* yacc.c:1646  */
     {
 		/* estrutura para diminuir o brilho e salvar em um arquivo diferente usando threads */
-		imagem I = abrir_imagem((yyvsp[-2].strval));
+		imagem I = abrir_imagem_malloc((yyvsp[-2].strval));
 		newThreads(&I, 1/(yyvsp[0].float_value));
 		salvar_imagem((yyvsp[-4].strval), &I);
+		liberar_imagem_malloc;
 	}
-#line 1303 "y.tab.c" /* yacc.c:1646  */
+#line 1304 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 8:
-#line 59 "./src/imageprocessing.y" /* yacc.c:1646  */
+#line 60 "./src/imageprocessing.y" /* yacc.c:1646  */
     {
 		/* estrutura para aumentar o brilho e salvar em um arquivo diferente usando processos */
-		imagem I = abrir_imagem((yyvsp[-2].strval));
+		imagem I = abrir_imagem_mmap((yyvsp[-2].strval));
 		altera_brilho_multi_process(&I, (yyvsp[0].float_value));
 		salvar_imagem((yyvsp[-4].strval), &I);
-		liberar_imagem(&I);
+		liberar_imagem_mmap(&I);
 	}
-#line 1315 "y.tab.c" /* yacc.c:1646  */
+#line 1316 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 9:
-#line 67 "./src/imageprocessing.y" /* yacc.c:1646  */
+#line 68 "./src/imageprocessing.y" /* yacc.c:1646  */
     {
 		/* estrutura para diminuir o brilho e salvar em um arquivo diferente usando processos */
-		imagem I = abrir_imagem((yyvsp[-2].strval));
-		altera_brilho_multi_process(&I, (yyvsp[0].float_value));
+		imagem I = abrir_imagem_mmap((yyvsp[-2].strval));
+		altera_brilho_multi_process(&I, 1/(yyvsp[0].float_value));
 		salvar_imagem((yyvsp[-4].strval), &I);
-		liberar_imagem(&I);
+		liberar_imagem_mmap(&I);
 	}
-#line 1327 "y.tab.c" /* yacc.c:1646  */
+#line 1328 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 10:
-#line 75 "./src/imageprocessing.y" /* yacc.c:1646  */
+#line 76 "./src/imageprocessing.y" /* yacc.c:1646  */
     {
 		/* estrutura para aumentar o brilho e salvar em um arquivo diferente varrendo por linhas */
-		imagem I = abrir_imagem((yyvsp[-2].strval));
+		imagem I = abrir_imagem_malloc((yyvsp[-2].strval));
 		altera_brilho_por_linhas(&I, (yyvsp[0].float_value));
 		salvar_imagem((yyvsp[-4].strval), &I);
-		liberar_imagem(&I);
+		liberar_imagem_malloc(&I);
 	}
-#line 1339 "y.tab.c" /* yacc.c:1646  */
+#line 1340 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 11:
-#line 83 "./src/imageprocessing.y" /* yacc.c:1646  */
+#line 84 "./src/imageprocessing.y" /* yacc.c:1646  */
     {
 		/* estrutura para diminuir o brilho e salvar em um arquivo diferente varrendo por linhas */
-		imagem I = abrir_imagem((yyvsp[-2].strval));
+		imagem I = abrir_imagem_malloc((yyvsp[-2].strval));
 		altera_brilho_por_linhas(&I, 1/(yyvsp[0].float_value));
 		salvar_imagem((yyvsp[-4].strval), &I);
-		liberar_imagem(&I);
+		liberar_imagem_malloc(&I);
 	}
-#line 1351 "y.tab.c" /* yacc.c:1646  */
+#line 1352 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 12:
-#line 91 "./src/imageprocessing.y" /* yacc.c:1646  */
+#line 92 "./src/imageprocessing.y" /* yacc.c:1646  */
     {
 		/* estrutura para aumentar o brilho e salvar em um arquivo diferente varrendo por colunas */
-		imagem I = abrir_imagem((yyvsp[-2].strval));
+		imagem I = abrir_imagem_malloc((yyvsp[-2].strval));
 		altera_brilho_por_colunas(&I, (yyvsp[0].float_value));
 		salvar_imagem((yyvsp[-4].strval), &I);
-		liberar_imagem(&I);
+		liberar_imagem_malloc(&I);
 	}
-#line 1363 "y.tab.c" /* yacc.c:1646  */
+#line 1364 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 13:
-#line 99 "./src/imageprocessing.y" /* yacc.c:1646  */
+#line 100 "./src/imageprocessing.y" /* yacc.c:1646  */
     {
 		/* estrutura para diminuir o brilho e salvar em um arquivo diferente varrendo por colunas */
-		imagem I = abrir_imagem((yyvsp[-2].strval));
+		imagem I = abrir_imagem_malloc((yyvsp[-2].strval));
 		altera_brilho_por_colunas(&I, 1/(yyvsp[0].float_value));
 		salvar_imagem((yyvsp[-4].strval), &I);
-		liberar_imagem(&I);
+		liberar_imagem_malloc(&I);
 	}
-#line 1375 "y.tab.c" /* yacc.c:1646  */
+#line 1376 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 14:
-#line 107 "./src/imageprocessing.y" /* yacc.c:1646  */
+#line 108 "./src/imageprocessing.y" /* yacc.c:1646  */
     {
 		/* estrutura para aumentar o brilho e salvar em um arquivo diferente */
-		imagem I = abrir_imagem((yyvsp[-2].strval));
+		imagem I = abrir_imagem_malloc((yyvsp[-2].strval));
 		altera_brilho(&I, (yyvsp[0].float_value));
 		salvar_imagem((yyvsp[-4].strval), &I);
-		liberar_imagem(&I);
+		liberar_imagem_malloc(&I);
 	}
-#line 1387 "y.tab.c" /* yacc.c:1646  */
+#line 1388 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 15:
-#line 115 "./src/imageprocessing.y" /* yacc.c:1646  */
+#line 116 "./src/imageprocessing.y" /* yacc.c:1646  */
     {
 		/* estrutura para diminuir o brilho e salvar em um arquivo diferente */
-		imagem I = abrir_imagem((yyvsp[-2].strval));
+		imagem I = abrir_imagem_malloc((yyvsp[-2].strval));
 		altera_brilho(&I, (1/(yyvsp[0].float_value)));
 		salvar_imagem((yyvsp[-4].strval), &I);
-		liberar_imagem(&I);
+		liberar_imagem_malloc(&I);
 	}
-#line 1399 "y.tab.c" /* yacc.c:1646  */
+#line 1400 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 16:
-#line 123 "./src/imageprocessing.y" /* yacc.c:1646  */
+#line 124 "./src/imageprocessing.y" /* yacc.c:1646  */
     {
 		/* imprime o valor máximo dos pixels da imagem */
-		imagem I = abrir_imagem((yyvsp[-1].strval));
+		imagem I = abrir_imagem_malloc((yyvsp[-1].strval));
 		valor_maximo(&I);
-		liberar_imagem(&I);
+		liberar_imagem_malloc(&I);
 	}
-#line 1410 "y.tab.c" /* yacc.c:1646  */
+#line 1411 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 17:
-#line 130 "./src/imageprocessing.y" /* yacc.c:1646  */
+#line 131 "./src/imageprocessing.y" /* yacc.c:1646  */
     {
 		exit(EXIT_SUCCESS);
 	}
-#line 1418 "y.tab.c" /* yacc.c:1646  */
+#line 1419 "y.tab.c" /* yacc.c:1646  */
     break;
 
 
-#line 1422 "y.tab.c" /* yacc.c:1646  */
+#line 1423 "y.tab.c" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1646,7 +1647,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 134 "./src/imageprocessing.y" /* yacc.c:1906  */
+#line 135 "./src/imageprocessing.y" /* yacc.c:1906  */
 
 
 

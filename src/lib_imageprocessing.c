@@ -10,7 +10,7 @@
 #include "imageprocessing.h"
 
 
-imagem abrir_imagem(char *nome_do_arquivo)
+imagem abrir_imagem_malloc(char *nome_do_arquivo)
 {
 	FIBITMAP *bitmapIn;
 	int x, y;
@@ -34,9 +34,51 @@ imagem abrir_imagem(char *nome_do_arquivo)
 	I.width = x;
 	I.height = y;
 
-	// I.r = malloc(sizeof(float) * x * y);
-	// I.g = malloc(sizeof(float) * x * y);
-	// I.b = malloc(sizeof(float) * x * y);
+	I.r = malloc(sizeof(float) * x * y);
+	I.g = malloc(sizeof(float) * x * y);
+	I.b = malloc(sizeof(float) * x * y);
+
+	for (int i=0; i<x; i++)
+	{
+		for (int j=0; j <y; j++)
+		{
+			int idx;
+			FreeImage_GetPixelColor(bitmapIn, i, j, &color);
+
+			idx = i + (j*x);
+
+			I.r[idx] = color.rgbRed;
+			I.g[idx] = color.rgbGreen;
+			I.b[idx] = color.rgbBlue;
+		}
+	}
+
+	return I;
+}
+
+imagem abrir_imagem_mmap(char *nome_do_arquivo)
+{
+	FIBITMAP *bitmapIn;
+	int x, y;
+	RGBQUAD color;
+	imagem I;
+
+	bitmapIn = FreeImage_Load(FIF_JPEG, nome_do_arquivo, 0);
+
+	if (bitmapIn == 0)
+	{
+		printf("Erro! Nao achei arquivo - %s\n", nome_do_arquivo);
+	}
+	else
+	{
+		printf("Arquivo lido corretamente!\n");
+	}
+
+	x = FreeImage_GetWidth(bitmapIn);
+	y = FreeImage_GetHeight(bitmapIn);
+
+	I.width = x;
+	I.height = y;
 
 	/* mapeia os vetores de cores na memória */
 	I.r = (float *) mmap(NULL, sizeof(float) * x * y,  PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANON, 0, 0);
@@ -61,13 +103,17 @@ imagem abrir_imagem(char *nome_do_arquivo)
 	return I;
 }
 
-
-void liberar_imagem(imagem *I)
+	
+void liberar_imagem_malloc(imagem *I)
 {
-	// free(I->r);
-	// free(I->g);
-	// free(I->b);
+	free(I->r);
+	free(I->g);
+	free(I->b);
+}
 
+
+void liberar_imagem_mmap(imagem *I)
+{
 	/* desmapeia a memória */
 	munmap(I->r, sizeof(float));
 	munmap(I->g, sizeof(float));
