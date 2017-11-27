@@ -414,7 +414,7 @@ void altera_brilho_multi_process(imagem *I, float valor_ganho)
 
 	pid_t childs[n];
 
-	passo = round(I->width/n);
+	passo = I->width/n;
 
 	for(k=0; k<n; k++)
 	{
